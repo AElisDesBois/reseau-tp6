@@ -95,11 +95,11 @@ int main(int argc, char* argv[]) {
         printf("getaddrinfo:   resolved name '%s' to IP address %s\n", ai->ai_canonname, ipstr);
     }
 #endif
-    printf("connecting...");
+    printf("connecting...\n");
 
     connect(fd,(struct sockaddr *)&hints, sizeof(struct sockaddr_in));
 
-    printf("connected");
+    printf("connected\n");
 
 
     /* send data */
@@ -109,14 +109,14 @@ int main(int argc, char* argv[]) {
 
     int len = write(fd, data, data_len);
 
-    printf("len apres envoie = %d", (int)len);
+    printf("len apres envoie = %d\n", (int)len);
 
     /* receive data */
 
     len = read(fd, data, data_len);
 
-    printf("len apres lecture = %d", (int)len);
-    printf("resultat = %s", data);
+    printf("len apres lecture = %d\n", (int)len);
+    printf("resultat = %s\n", data);
 
 
     /* cleanup */
