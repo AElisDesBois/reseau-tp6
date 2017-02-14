@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
     char ipstr[INET6_ADDRSTRLEN];
     int error;
 #endif
-    //int fd;
+    int fd;
     //size_t  data_len, header_len;
     //ssize_t len;
     //char *data;
@@ -68,7 +68,8 @@ int main(int argc, char* argv[]) {
     printf("sending to %s:%d\n", host, (int)port);
 
     /* create a socket, no bind needed, let the system choose */
-
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    printf("%d\n",fd );
     /* gethostbyname for information, getaddrinfo is prefered */
 #ifdef LEGACY
     if((hp = gethostbyname(host)) == NULL) {
@@ -94,6 +95,8 @@ int main(int argc, char* argv[]) {
         printf("getaddrinfo:   resolved name '%s' to IP address %s\n", ai->ai_canonname, ipstr);
     }
 #endif
+
+    connect(fd,(struct sockaddr *)&hints, sizeof(struct sockaddr_in));
 
     /* send data */
 

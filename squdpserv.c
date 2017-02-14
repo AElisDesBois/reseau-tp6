@@ -100,6 +100,12 @@ int main(int argc, char* argv[]) {
     /* send data */
     printf("integer value: %ld\n", ch);
 
+
+    sprintf(data, "%ld", ch*ch);
+    len = sendto(fd, data, data_len, 0, (struct sockaddr *)&sin, sin_len);
+
+    printf("len = %d", (int)len);
+
     /* cleanup */
     free(data);
     close(fd);
