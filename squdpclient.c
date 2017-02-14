@@ -97,7 +97,18 @@ int main(int argc, char* argv[]) {
 #endif
     printf("connecting...\n");
 
-    int len = connect(fd,(struct sockaddr *)ai, sizeof(struct sockaddr_in));
+    struct sockaddr_in dest; 
+
+    memset(&dest, 0, sizeof(dest));                /* zero the struct */
+    dest.sin_family = AF_INET;
+    dest.sin_addr.s_addr = htonl(INADDR_LOOPBACK); /* set destination IP number - localhost, 127.0.0.1*/ 
+    dest.sin_port = htons(port);                /* set destination port number */
+ 
+
+
+
+
+    int len = connect(fd,(struct sockaddr *)&dest, sizeof(struct sockaddr_in));
     if(len < 0){
         perror("connected faild: ");  
         return -1;
@@ -128,7 +139,7 @@ int main(int argc, char* argv[]) {
         perror("read faild: ");  
         return -1;
     } 
-    
+
     printf("len apres lecture = %d\n", (int)len);
     printf("resultat = %s\n", data);
 
