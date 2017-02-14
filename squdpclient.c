@@ -97,24 +97,38 @@ int main(int argc, char* argv[]) {
 #endif
     printf("connecting...\n");
 
-    connect(fd,(struct sockaddr *)&hints, sizeof(struct sockaddr_in));
+    int len = connect(fd,(struct sockaddr *)ai, sizeof(struct sockaddr_in));
+    if(len < 0){
+        perror("connected faild: ");  
+        return -1;
+    } 
 
-    printf("connected\n");
-
+    printf("connected => len = %d\n", len);
 
     /* send data */
     int data_len = 10;
     char* data = (char *) malloc(data_len);
     data = "5";
 
-    int len = write(fd, data, data_len);
-
+//    int len = write(fd, data, data_len);
+    int hints_len = sizeof(struct sockaddr_in);
+    len = sendto(fd, data, data_len, 0, (struct sockaddr *)&hints, hints_len);
+    
+    if(len < 0){
+        perror("sendto faild: ");  
+        return -1;
+    } 
     printf("len apres envoie = %d\n", (int)len);
 
     /* receive data */
 
     len = read(fd, data, data_len);
 
+    if(len < 0){
+        perror("read faild: ");  
+        return -1;
+    } 
+    
     printf("len apres lecture = %d\n", (int)len);
     printf("resultat = %s\n", data);
 
