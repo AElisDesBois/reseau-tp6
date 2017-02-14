@@ -95,14 +95,34 @@ int main(int argc, char* argv[]) {
         printf("getaddrinfo:   resolved name '%s' to IP address %s\n", ai->ai_canonname, ipstr);
     }
 #endif
+    printf("connecting...");
 
     connect(fd,(struct sockaddr *)&hints, sizeof(struct sockaddr_in));
 
+    printf("connected");
+
+
     /* send data */
+    int data_len = 10;
+    char* data = (char *) malloc(data_len);
+    data = "5";
+
+    int len = write(fd, data, data_len);
+
+    printf("len apres envoie = %d", (int)len);
 
     /* receive data */
 
+    len = read(fd, data, data_len);
+
+    printf("len apres lecture = %d", (int)len);
+    printf("resultat = %s", data);
+
+
     /* cleanup */
+
+    free(data);
+    close(fd);
 
     return EX_OK;
 }
