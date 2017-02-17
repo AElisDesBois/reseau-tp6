@@ -2,7 +2,7 @@
 # using implicit rules
 # generate targets for every .c file (only standalone .c commands)
 
-CFLAGS=-Wall
+CFLAGS=-Wall -ggdb
 CC=gcc
 RM=/bin/rm -f
 
