@@ -121,20 +121,18 @@ int main(int argc, char* argv[]) {
     char* data = (char *) malloc(data_len);
     data = "5";
 
-//    int len = write(fd, data, data_len);
-
-
-    struct sockaddr_in *ai_inet = ai;
-    while(ai != NULL && ai->ai_family != AF_INET ) {
-        ai = ai->next;
+    struct addrinfo *ai_inet = ai;
+    while(ai_inet != NULL && ai_inet->ai_family != AF_INET ) {
+        ai_inet = ai_inet->ai_next;
     }
-    if(ai== NULL) {
-        printf("ai = null")
-        exit;
+    if(ai_inet== NULL) {
+        printf("ai = null");
+        return -1;
     }
 
     int ai_len = sizeof(struct sockaddr_in);
-    len = sendto(fd, data, data_len, 0, (struct sockaddr *)ai, ai_len);
+//    int len = write(fd, data, data_len);
+    len = sendto(fd, data, data_len, 0, (struct sockaddr *)ai_inet, ai_len);
     
     if(len < 0){
         perror("sendto faild: ");  
@@ -145,7 +143,7 @@ int main(int argc, char* argv[]) {
     /* receive data */
 
     //len = read(fd, data, data_len);
-    len = recvfrom(fd, data, data_len, 0, (struct sockaddr *)&dest, &hints_len);
+    len = recvfrom(fd, data, data_len, 0, (struct sockaddr *)ai_inet, &ai_len);
 
     if(len < 0){
         perror("read faild: ");  
