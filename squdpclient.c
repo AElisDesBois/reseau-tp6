@@ -101,22 +101,19 @@ int main(int argc, char* argv[]) {
         printf("getaddrinfo:   resolved name '%s' to IP address %s\n", ai->ai_canonname, ipstr);
     }
 #endif
+
+    if(ai_inet== NULL) {
+        printf("ai_inet = null");
+        return -1;
+    }
+
     printf("connecting...\n");
 
-    struct sockaddr_in dest; 
-
-    memset(&dest, 0, sizeof(dest));                /* zero the struct */
-    dest.sin_family = AF_INET;
-    dest.sin_addr.s_addr = htonl(INADDR_LOOPBACK); /* set destination IP number - localhost, 127.0.0.1*/ 
-    dest.sin_port = htons(port);                /* set destination port number */
- 
-
-
-
-
-    int len = connect(fd,(struct sockaddr *)&dest, sizeof(struct sockaddr_in));
+    printf("ai_inet->ai_addr =  %x\n", ai_inet->ai_addr);
+    
+    int len = connect(fd,(struct sockaddr *)(ai_inet->ai_addr), sizeof(struct sockaddr_in));
     if(len < 0){
-        perror("connected faild: ");  
+        perror("connected failed: ");  
         return -1;
     } 
 
@@ -128,10 +125,6 @@ int main(int argc, char* argv[]) {
     data = "5";
 
 
-    if(ai_inet== NULL) {
-        printf("ai_inet = null");
-        return -1;
-    }
 
 
     int ai_len = sizeof(struct sockaddr_in);
