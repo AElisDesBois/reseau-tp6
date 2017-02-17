@@ -144,7 +144,8 @@ int main(int argc, char* argv[]) {
 
     /* receive data */
 
-    len = read(fd, data, data_len);
+    //len = read(fd, data, data_len);
+    len = recvfrom(fd, data, data_len, 0, (struct sockaddr *)&dest, &hints_len);
 
     if(len < 0){
         perror("read faild: ");  
