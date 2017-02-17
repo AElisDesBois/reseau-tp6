@@ -37,6 +37,7 @@ int main(int argc, char* argv[]) {
     char service[15];
     char ipstr[INET6_ADDRSTRLEN];
     int error;
+    struct addrinfo *ai_inet;
 #endif
     int fd;
     //size_t  data_len, header_len;
@@ -88,7 +89,12 @@ int main(int argc, char* argv[]) {
     }
     for(; ai != NULL; ai = ai->ai_next) {
         switch (ai->ai_family) {
-            case AF_INET:  inet_ntop(ai->ai_family, &(((struct sockaddr_in *)ai->ai_addr)->sin_addr), ipstr, sizeof(ipstr)); break;
+            case AF_INET:   inet_ntop(ai->ai_family, &(((struct sockaddr_in *)ai->ai_addr)->sin_addr), ipstr, sizeof(ipstr)); 
+                            if(ai_inet==NULL) {
+                                ai_inet = ai;
+                            }
+                            break;
+
             case AF_INET6: inet_ntop(ai->ai_family, &(((struct sockaddr_in6 *)ai->ai_addr)->sin6_addr), ipstr, sizeof(ipstr)); break;
             default: errx(EX_NOHOST, "(getaddrinfo) unknown address family: %d", ai->ai_family);
         }
@@ -121,14 +127,12 @@ int main(int argc, char* argv[]) {
     char* data = (char *) malloc(data_len);
     data = "5";
 
-    struct addrinfo *ai_inet = ai;
-    while(ai_inet != NULL && ai_inet->ai_family != AF_INET ) {
-        ai_inet = ai_inet->ai_next;
-    }
+
     if(ai_inet== NULL) {
-        printf("ai = null");
+        printf("ai_inet = null");
         return -1;
     }
+
 
     int ai_len = sizeof(struct sockaddr_in);
 //    int len = write(fd, data, data_len);
@@ -143,7 +147,7 @@ int main(int argc, char* argv[]) {
     /* receive data */
 
     //len = read(fd, data, data_len);
-    len = recvfrom(fd, data, data_len, 0, (struct sockaddr *)ai_inet, &ai_len);
+    len = recvfrom(fd, data, data_len, 0, (struct sockaddr *)ai_inet,(socklen_t*) &ai_len);
 
     if(len < 0){
         perror("read faild: ");  
