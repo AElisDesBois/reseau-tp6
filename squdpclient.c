@@ -37,7 +37,6 @@ int main(int argc, char* argv[]) {
     char service[15];
     char ipstr[INET6_ADDRSTRLEN];
     int error;
-    struct addrinfo *ai_inet;
 #endif
     int fd;
     //size_t  data_len, header_len;
@@ -81,37 +80,23 @@ int main(int argc, char* argv[]) {
     /* getaddrinfo is the prefered method today */
     memset(&hints, 0, sizeof(hints));
     hints.ai_flags = AI_ADDRCONFIG | AI_CANONNAME | AI_NUMERICSERV; // AI_PASSIVE
-    hints.ai_family = AF_UNSPEC; // AF_INET AF_INET6
+    hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_DGRAM;
     snprintf(service, sizeof(service), "%ld", port);
     if ((error = getaddrinfo(host, service, &hints, &ai)) != 0) {
         errx(EX_NOHOST, "(getaddrinfo) cannot resolve %s: %s", host, gai_strerror(error));
     }
-    for(; ai != NULL; ai = ai->ai_next) {
-        switch (ai->ai_family) {
-            case AF_INET:   inet_ntop(ai->ai_family, &(((struct sockaddr_in *)ai->ai_addr)->sin_addr), ipstr, sizeof(ipstr)); 
-                            if(ai_inet==NULL) {
-                                ai_inet = ai;
-                            }
-                            break;
-
-            case AF_INET6: inet_ntop(ai->ai_family, &(((struct sockaddr_in6 *)ai->ai_addr)->sin6_addr), ipstr, sizeof(ipstr)); break;
-            default: errx(EX_NOHOST, "(getaddrinfo) unknown address family: %d", ai->ai_family);
-        }
-        printf("getaddrinfo:   resolved name '%s' to IP address %s\n", ai->ai_canonname, ipstr);
-    }
 #endif
 
-    if(ai_inet== NULL) {
-        printf("ai_inet = null");
+    if(ai == NULL) {
+        printf("ai = null");
         return -1;
     }
-
+    inet_ntop(ai->ai_family, &(((struct sockaddr_in *)ai->ai_addr)->sin_addr), ipstr, sizeof(ipstr));
+    printf("getaddrinfo:   resolved name '%s' to IP address %s\n", ai->ai_canonname, ipstr);
     printf("connecting...\n");
-
-    printf("ai_inet->ai_addr =  %x\n", ai_inet->ai_addr);
-    
-    int len = connect(fd,(struct sockaddr *)(ai_inet->ai_addr), sizeof(struct sockaddr_in));
+   
+    int len = connect(fd,(struct sockaddr *)(ai->ai_addr), sizeof(struct sockaddr_in));
     if(len < 0){
         perror("connected failed: ");  
         return -1;
@@ -124,15 +109,13 @@ int main(int argc, char* argv[]) {
     char* data = (char *) malloc(data_len);
     data = "5";
 
-
-
-
     int ai_len = sizeof(struct sockaddr_in);
 //    int len = write(fd, data, data_len);
-    len = sendto(fd, data, data_len, 0, (struct sockaddr *)ai_inet, ai_len);
+//    len = sendto(fd, data, data_len, 0, (struct sockaddr *)ai, ai_len);
+    len = send(fd, data, data_len, 0);
     
     if(len < 0){
-        perror("sendto faild: ");  
+        perror("sendto failed: ");  
         return -1;
     } 
     printf("len apres envoie = %d\n", (int)len);
@@ -140,10 +123,11 @@ int main(int argc, char* argv[]) {
     /* receive data */
 
     //len = read(fd, data, data_len);
-    len = recvfrom(fd, data, data_len, 0, (struct sockaddr *)ai_inet,(socklen_t*) &ai_len);
+    len = recvfrom(fd, data, data_len, 0, (struct sockaddr *)ai,(socklen_t*) &ai_len);
+//    len = recv(fd, data, data_len, 0);
 
     if(len < 0){
-        perror("read faild: ");  
+        perror("read failed: ");  
         return -1;
     } 
 

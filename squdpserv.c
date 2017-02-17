@@ -78,34 +78,36 @@ int main(int argc, char* argv[]) {
         err(EX_SOFTWARE, "in bind");
     }
 
-    /* receive data */
-    sin_len = sizeof(sin);
-    len = recvfrom(fd, data, data_len, 0, (struct sockaddr *)&sin, &sin_len);
-    if (len < 0) {
-        free(data);
-        close(fd);
-        err(EX_SOFTWARE, "in recvfrom");
+
+    while(1) {
+        /* receive data */
+        sin_len = sizeof(sin);
+        len = recvfrom(fd, data, data_len, 0, (struct sockaddr *)&sin, &sin_len);
+        if (len < 0) {
+            free(data);
+            close(fd);
+            err(EX_SOFTWARE, "in recvfrom");
+        }
+
+        printf("got '%s' from IP address %s port %d\n", data, inet_ntoa(sin.sin_addr), ntohs(sin.sin_port));
+
+        ch = strtol(data, &end, 10);
+
+        switch (errno) {
+            case EINVAL: err(EX_DATAERR, "not an integer");
+            case ERANGE: err(EX_DATAERR, "out of range");
+            default: if (ch == 0 && data == end) errx(EX_DATAERR, "no value");  // Linux returns 0 if no numerical value was given
+        }
+
+        /* send data */
+        printf("integer value: %ld\n", ch);
+
+
+        sprintf(data, "%ld", ch*ch);
+        len = sendto(fd, data, data_len, 0, (struct sockaddr *)&sin, sin_len);
+
+        printf("len = %d\n", (int)len);
     }
-
-    printf("got '%s' from IP address %s port %d\n", data, inet_ntoa(sin.sin_addr), ntohs(sin.sin_port));
-
-    ch = strtol(data, &end, 10);
-
-    switch (errno) {
-        case EINVAL: err(EX_DATAERR, "not an integer");
-        case ERANGE: err(EX_DATAERR, "out of range");
-        default: if (ch == 0 && data == end) errx(EX_DATAERR, "no value");  // Linux returns 0 if no numerical value was given
-    }
-
-    /* send data */
-    printf("integer value: %ld\n", ch);
-
-
-    sprintf(data, "%ld", ch*ch);
-    len = sendto(fd, data, data_len, 0, (struct sockaddr *)&sin, sin_len);
-
-    printf("len = %d", (int)len);
-
     /* cleanup */
     free(data);
     close(fd);
