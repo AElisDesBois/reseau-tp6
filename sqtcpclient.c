@@ -68,7 +68,8 @@ int main(int argc, char* argv[]) {
     printf("sending to %s:%d\n", host, (int)port);
 
     /* create a socket, no bind needed, let the system choose */
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    // fd = socket(AF_INET, SOCK_DGRAM, 0);
+    fd = socket(AF_INET, SOCK_STREAM, 0);
     printf("%d\n",fd );
     /* gethostbyname for information, getaddrinfo is prefered */
 #ifdef LEGACY
@@ -81,7 +82,8 @@ int main(int argc, char* argv[]) {
     memset(&hints, 0, sizeof(hints));
     hints.ai_flags = AI_ADDRCONFIG | AI_CANONNAME | AI_NUMERICSERV; // AI_PASSIVE
     hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_socktype = SOCK_STREAM;
+    // hints.ai_socktype = SOCK_DGRAM;
     snprintf(service, sizeof(service), "%ld", port);
     if ((error = getaddrinfo(host, service, &hints, &ai)) != 0) {
         errx(EX_NOHOST, "(getaddrinfo) cannot resolve %s: %s", host, gai_strerror(error));

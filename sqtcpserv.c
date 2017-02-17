@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
     }
 
     /* create and bind a socket */
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) {
         free(data);
         err(EX_SOFTWARE, "in socket");
@@ -78,13 +78,30 @@ int main(int argc, char* argv[]) {
         err(EX_SOFTWARE, "in bind");
     }
 
+    if(listen(fd, BUFFER_SIZE) < 0){
+        free(data);
+        close(fd);
+        err(EX_SOFTWARE, "in listen");
+    }
+
+    int readSocket = accept(fd, (struct sockaddr *) &sin, &sin_len);
+    if(readSocket < 0){
+        free(data);
+        close(fd);
+        err(EX_SOFTWARE, "in accept");
+    }
+
+    close(fd);
+    
     while(1) {
         /* receive data */
         sin_len = sizeof(sin);
-        len = recvfrom(fd, data, data_len, 0, (struct sockaddr *)&sin, &sin_len);
+        //len = recvfrom(fd, data, data_len, 0, (struct sockaddr *)&sin, &sin_len);
+        len = recv(readSocket, data, data_len, 0);
         if (len < 0) {
+            printf("dsfsd\n");
             free(data);
-            close(fd);
+            close(readSocket);
             err(EX_SOFTWARE, "in recvfrom");
         }
 
@@ -103,14 +120,15 @@ int main(int argc, char* argv[]) {
 
 
         sprintf(data, "%ld", ch*ch);
-        len = sendto(fd, data, data_len, 0, (struct sockaddr *)&sin, sin_len);
+        // len = sendto(fd, data, data_len, 0, (struct sockaddr *)&sin, sin_len);
+        len = send(readSocket, data, data_len, 0);
 
         printf("len = %d\n", (int)len);
         
     }
     /* cleanup */
     free(data);
-    close(fd);
+    close(readSocket);
 
     return EX_OK;
 }

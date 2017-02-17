@@ -1,3 +1,5 @@
 SqTCPServ.class
 squdpclient
 squdpserv
+sqtcpclient
+sqtcpserv
