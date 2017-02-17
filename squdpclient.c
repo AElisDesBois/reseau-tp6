@@ -122,8 +122,19 @@ int main(int argc, char* argv[]) {
     data = "5";
 
 //    int len = write(fd, data, data_len);
-    int hints_len = sizeof(struct sockaddr_in);
-    len = sendto(fd, data, data_len, 0, (struct sockaddr *)&hints, hints_len);
+
+
+    struct sockaddr_in *ai_inet = ai;
+    while(ai != NULL && ai->ai_family != AF_INET ) {
+        ai = ai->next;
+    }
+    if(ai== NULL) {
+        printf("ai = null")
+        exit;
+    }
+
+    int ai_len = sizeof(struct sockaddr_in);
+    len = sendto(fd, data, data_len, 0, (struct sockaddr *)ai, ai_len);
     
     if(len < 0){
         perror("sendto faild: ");  
